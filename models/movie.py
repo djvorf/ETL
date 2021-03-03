@@ -1,18 +1,26 @@
+import datetime
+from typing import List
+from typing import Optional
 
 from pydantic import BaseModel
-from pydantic.schema import date, datetime
+from pydantic.schema import date
 from pydantic.types import UUID
 
 
 class Movie(BaseModel):
-    created: datetime
-    modified: datetime
-    id: UUID
+    created: str
+    modified: str
+    id: str
     title: str
     description: str
-    created_date: date
+    create_date: str
     age_qualification: int
     rating: float
     file: str
-    category_id: UUID
+    category: str
+    genres: Optional[List[str]]
+    actors: Optional[List[str]]
+    writers: Optional[List[str]]
+    directors: Optional[List[str]]
+
 
