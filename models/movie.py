@@ -1,10 +1,7 @@
-import datetime
 from typing import List
 from typing import Optional
 
 from pydantic import BaseModel
-from pydantic.schema import date
-from pydantic.types import UUID
 
 
 class Movie(BaseModel):

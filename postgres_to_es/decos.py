@@ -11,11 +11,10 @@ def coroutine(func):
         fn = func(*args, **kwargs)
         next(fn)
         return fn
-
     return inner
 
 
-def retry(exception_to_check: Exception, tries: int = 4, delay: int = 2, backoff: int = 2, logger=logger):
+def retry(exception_to_check: Exception, tries: int = 20, delay: int = 2, backoff: int = 2, logger=logger):
     def deco_retry(f):
         @wraps(f)
         def f_retry(*args, **kwargs):

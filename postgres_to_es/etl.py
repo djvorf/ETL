@@ -17,6 +17,11 @@ logger = logging.getLogger()
 @retry(exception_to_check=Exception)
 @coroutine
 def get_updated_data(dsl: dict, target):
+    """
+    Получение данных из постгрехи
+    :param target: generator
+    :return:
+    """
     with psycopg2.connect(**dsl, cursor_factory=DictCursor) as pg_conn, pg_conn.cursor() as cursor:
         while True:
             table_name = (yield)
@@ -72,8 +77,27 @@ def transform_data(target):
 
 
 @retry(exception_to_check=Exception)
-def check_elastic():
-    requests.get('http://localhost:9201/')
+def load_data(rows: list, index_name: str):
+    url = 'http://localhost:9201/'
+    prepared_query = []
+    for row in rows:
+        prepared_query.extend([
+            json.dumps({'index': {'_index': index_name, '_id': row['id']}}),
+            json.dumps(row)
+        ])
+
+    str_query = '\n'.join(prepared_query) + '\n'
+
+    response = requests.post(
+        urljoin(url, '_bulk'),
+        data=str_query,
+        headers={'Content-Type': 'application/x-ndjson'}
+    )
+    json_response = json.loads(response.content.decode())
+    for item in json_response['items']:
+        error_message = item['index'].get('error')
+        if error_message:
+            logger.error(error_message)
 
 
 @coroutine
@@ -82,28 +106,8 @@ def load_to_es(index_name: str):
     Отправка запроса в ES и разбор ошибок сохранения данных
     """
     while True:
-        check_elastic()
-        url = 'http://localhost:9201/'
         rows = (yield)
-        prepared_query = []
-        for row in rows:
-            prepared_query.extend([
-                json.dumps({'index': {'_index': index_name, '_id': row['id']}}),
-                json.dumps(row)
-            ])
-
-        str_query = '\n'.join(prepared_query) + '\n'
-
-        response = requests.post(
-            urljoin(url, '_bulk'),
-            data=str_query,
-            headers={'Content-Type': 'application/x-ndjson'}
-        )
-        json_response = json.loads(response.content.decode())
-        for item in json_response['items']:
-            error_message = item['index'].get('error')
-            if error_message:
-                logger.error(error_message)
+        load_data(rows=rows, index_name='movies')
 
 
 if __name__ == '__main__':
