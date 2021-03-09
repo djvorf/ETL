@@ -71,12 +71,18 @@ def transform_data(target):
         target.send(records)
 
 
+@retry(exception_to_check=Exception)
+def check_elastic():
+    requests.get('http://localhost:9201/')
+
+
 @coroutine
 def load_to_es(index_name: str):
     """
     Отправка запроса в ES и разбор ошибок сохранения данных
     """
     while True:
+        check_elastic()
         url = 'http://localhost:9201/'
         rows = (yield)
         prepared_query = []
