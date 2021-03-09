@@ -26,7 +26,8 @@ def retry(exception_to_check: Exception, tries: int = 20, delay: int = 2, backof
                     logger.warning(msg=f"{e}, Retrying in {mdelay} seconds...")
                     time.sleep(mdelay)
                     mtries -= 1
-                    mdelay *= backoff
+                    if mdelay != 256:
+                        mdelay *= backoff
             return f(*args, **kwargs)
         return f_retry
     return deco_retry

@@ -107,7 +107,7 @@ def load_to_es(index_name: str):
     """
     while True:
         rows = (yield)
-        load_data(rows=rows, index_name='movies')
+        load_data(rows=rows, index_name=index_name)
 
 
 if __name__ == '__main__':
