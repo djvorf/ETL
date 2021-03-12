@@ -19,5 +19,3 @@ class Movie(BaseModel):
     actors: Optional[List[str]]
     writers: Optional[List[str]]
     directors: Optional[List[str]]
-
-

@@ -3,7 +3,7 @@ import json
 import logging
 
 import requests
-import psycopg2 as psycopg2
+import psycopg2
 
 from psycopg2.extras import DictCursor
 from urllib.parse import urljoin
@@ -22,7 +22,7 @@ def get_updated_data(dsl: dict, target):
     :param target: generator
     :return:
     """
-    with psycopg2.connect(**dsl, cursor_factory=DictCursor) as pg_conn, pg_conn.cursor() as cursor:
+    with psycopg2.connect(**dsl, cursor_factory=psycopg2.extras.DictCursor) as pg_conn, pg_conn.cursor() as cursor:
         while True:
             table_name = (yield)
             cursor.execute(
@@ -78,7 +78,7 @@ def transform_data(target):
 
 @retry(exception_to_check=Exception)
 def load_data(rows: list, index_name: str):
-    url = 'http://localhost:9201/'
+    url = 'http://localhost:9200/'
     prepared_query = []
     for row in rows:
         prepared_query.extend([
