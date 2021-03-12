@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+from pprint import pprint
 
 import requests
 import psycopg2
@@ -22,7 +23,7 @@ def get_updated_data(dsl: dict, target):
     :param target: generator
     :return:
     """
-    with psycopg2.connect(**dsl, cursor_factory=psycopg2.extras.DictCursor) as pg_conn, pg_conn.cursor() as cursor:
+    with psycopg2.connect(**dsl) as pg_conn, pg_conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
         while True:
             table_name = (yield)
             cursor.execute(
@@ -69,10 +70,13 @@ def transform_data(target):
         records = []
         for item in values:
             records.append(Movie(
-                created=item[0].strftime("%m-%d-%Y:%H:%M:%S"), modified=item[1].strftime("%m-%d-%Y:%H:%M:%S"),
-                id=item[2], title=item[3], description=item[4], create_date=item[5].strftime("%m-%d-%Y"),
-                age_qualification=item[6], rating=item[7], file=item[8], category=item[9][0], genres=item[10],
-                actors=item[11], writers=item[12], directors=item[13]).dict())
+                created=item.get('created').strftime("%m-%d-%Y:%H:%M:%S"),
+                modified=item.get('modified').strftime("%m-%d-%Y:%H:%M:%S"),
+                id=item.get('id'), title=item.get('title'), description=item.get('description'),
+                create_date=item.get('create_date').strftime("%m-%d-%Y"),
+                age_qualification=item.get('age_qualification'), rating=item.get('rating'), file=item.get('file'),
+                category=item.get('type')[0], genres=item.get('genres'),
+                actors=item.get('actors'), writers=item.get('writers'), directors=item.get('directors')).dict())
         target.send(records)
 
 
