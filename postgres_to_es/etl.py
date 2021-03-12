@@ -1,7 +1,6 @@
 import os
 import json
 import logging
-from pprint import pprint
 
 import requests
 import psycopg2
@@ -23,7 +22,7 @@ def get_updated_data(dsl: dict, target):
     :param target: generator
     :return:
     """
-    with psycopg2.connect(**dsl) as pg_conn, pg_conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+    with psycopg2.connect(**dsl) as pg_conn, pg_conn.cursor(cursor_factory=DictCursor) as cursor:
         while True:
             table_name = (yield)
             cursor.execute(
